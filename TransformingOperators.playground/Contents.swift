@@ -4,6 +4,20 @@ import Combine
 var subscriptions = Set<AnyCancellable>()
 
 
+//使用映射型operator对每个数据进行逐一的处理 2023-03-05(Sun) 16:04:00 
+example(of: "map") {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .spellOut
+    
+    [234, 89, 1090].publisher
+        .map { value in
+            formatter.string(for: NSNumber(integerLiteral: value)) ?? ""
+        }
+        .sink { value in
+            print("Received value in sink: \(value)")
+        }
+        .store(in: &subscriptions)
+}
 
 
 //使用缓存类operator来缓存队列数据 2023-03-05(Sun) 15:51:05
