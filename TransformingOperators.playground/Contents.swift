@@ -3,7 +3,37 @@ import Combine
 
 var subscriptions = Set<AnyCancellable>()
 
-<#Add your code here#>
+
+
+
+//使用缓存类operator来缓存队列数据 2023-03-05(Sun) 15:51:05
+example(of: "Collect") {
+    ["甲","乙","丙","丁","戊己庚辛","金木水火","乾坤"].publisher
+        .collect(3)
+        .sink { completion in
+            print("Completion in sink: \(completion)")
+        } receiveValue: { value in
+            print("Value in sink: \(value)")
+            value.publisher
+                .sink { string in
+                    print("--value in array: \(string)")
+                }
+        }
+        .store(in: &subscriptions)
+}
+/*
+ ——— Example of: Collect ———
+ Value in sink: ["甲", "乙", "丙"]
+ --value in array: 甲
+ --value in array: 乙
+ --value in array: 丙
+ Value in sink: ["丁", "戊己庚辛", "金木水火"]
+ --value in array: 丁
+ --value in array: 戊己庚辛
+ --value in array: 金木水火
+ Value in sink: ["乾坤"]
+ --value in array: 乾坤
+ Completion in sink: finished*/
 
 /// Copyright (c) 2021 Razeware LLC
 ///
