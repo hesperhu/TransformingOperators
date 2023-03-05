@@ -4,7 +4,7 @@ import Combine
 var subscriptions = Set<AnyCancellable>()
 
 
-//如果队列中没有值，那么在结束之前，可以人为的发送一个消息 2023-03-05(Sun) 21:07:47 
+//如果队列中没有值，那么在结束之前，可以人为的发送一个消息进行补充 2023-03-05(Sun) 21:07:47
 example(of: "replaceEmptyWith") {
     let empty = Empty<Int, Never>()
     
