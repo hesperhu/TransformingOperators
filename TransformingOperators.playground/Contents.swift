@@ -3,6 +3,36 @@ import Combine
 
 var subscriptions = Set<AnyCancellable>()
 
+//使用映射型处理逻辑，对消息进行个性化处理 2023-03-05(Sun) 20:54:57
+example(of: "flatMap") {
+    func decode(_ codes: [Int]) -> AnyPublisher<String, Never> {
+        Just(
+            codes
+                .compactMap{ code in
+                guard (32...255).contains(code) else {return nil}
+                return String(UnicodeScalar(code) ?? " ")
+                }
+                .joined()
+        )
+        .eraseToAnyPublisher()
+    }
+    
+    [72, 101, 108, 108, 111, 44, 32, 87, 111, 114, 108, 100, 33]
+        .publisher
+        .collect(7)
+        .flatMap(decode)
+        .sink { value in
+            print(value)
+        }
+        .store(in: &subscriptions)
+    
+}
+/*
+ ——— Example of: flatMap ———
+ Hello,
+ World!
+ */
+
 //在处理数据流的过程中，使用try类型的operator，可以把error往后传递 2023-03-05(Sun) 17:05:55
 example(of: "tryMap") {
     Just("File path of nowhere")
