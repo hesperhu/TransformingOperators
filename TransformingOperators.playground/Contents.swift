@@ -3,6 +3,29 @@ import Combine
 
 var subscriptions = Set<AnyCancellable>()
 
+//在处理数据流的过程中，使用try类型的operator，可以把error往后传递 2023-03-05(Sun) 17:05:55
+example(of: "tryMap") {
+    Just("File path of nowhere")
+        .tryMap { value in
+            try FileManager.default.contentsOfDirectory(atPath: value)
+        }
+        .sink { completion in
+            print("Error received in sink:")
+            print(completion)
+        } receiveValue: { value in
+            print(value)
+        }
+        .store(in: &subscriptions)
+}
+/*
+ ——— Example of: tryMap ———
+ Error received in sink:
+ failure(Error Domain=NSCocoaErrorDomain Code=260 "The folder “File path of nowhere” doesn’t exist." UserInfo={NSUserStringVariant=(
+     Folder
+ ), NSFilePath=File path of nowhere, NSUnderlyingError=0x600002370690 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}})
+ */
+
+
 //使用映射型的operator对对象的属性进行深入的处理 2023-03-05(Sun) 16:18:29
 example(of: "Mapping key paths") {
     let publisher = PassthroughSubject<Coordinate, Never>()
