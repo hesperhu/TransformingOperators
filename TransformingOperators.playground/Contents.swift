@@ -3,8 +3,32 @@ import Combine
 
 var subscriptions = Set<AnyCancellable>()
 
+//使用映射型的operator对对象的属性进行深入的处理 2023-03-05(Sun) 16:18:29
+example(of: "Mapping key paths") {
+    let publisher = PassthroughSubject<Coordinate, Never>()
+    
+    publisher
+        .map(\.x, \.y)
+        .sink { x, y in
+            print("坐标(\(x),\(y))在四象限的位置:\(quadrantOf(x: x, y: y))")
+        }
+        .store(in: &subscriptions)
+    
+    publisher.send(Coordinate(x: 45, y: 9))
+    publisher.send(Coordinate(x: -45, y: 9))
+    publisher.send(Coordinate(x: 0, y: 9))
+    publisher.send(Coordinate(x: 0, y: 0))
+    publisher.send(Coordinate(x: -1, y: -1))
+}
+/*
+ ——— Example of: Mapping key paths ———
+ 坐标(45,9)在四象限的位置:1
+ 坐标(-45,9)在四象限的位置:2
+ 坐标(0,9)在四象限的位置:boundary
+ 坐标(0,0)在四象限的位置:boundary
+ 坐标(-1,-1)在四象限的位置:3*/
 
-//使用映射型operator对每个数据进行逐一的处理 2023-03-05(Sun) 16:04:00 
+//使用映射型operator对每个数据进行逐一的处理 2023-03-05(Sun) 16:04:00
 example(of: "map") {
     let formatter = NumberFormatter()
     formatter.numberStyle = .spellOut
@@ -18,7 +42,12 @@ example(of: "map") {
         }
         .store(in: &subscriptions)
 }
-
+/*
+ ——— Example of: map ———
+ Received value in sink: two hundred thirty-four
+ Received value in sink: eighty-nine
+ Received value in sink: one thousand ninety
+*/
 
 //使用缓存类operator来缓存队列数据 2023-03-05(Sun) 15:51:05
 example(of: "Collect") {
