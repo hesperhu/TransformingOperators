@@ -3,6 +3,42 @@ import Combine
 
 var subscriptions = Set<AnyCancellable>()
 
+
+//如果队列中没有值，那么在结束之前，可以人为的发送一个消息 2023-03-05(Sun) 21:07:47
+example(of: "replaceEmptyWith") {
+    let empty = Empty<Int, Never>()
+    
+    empty
+        .replaceEmpty(with: 1)
+        .sink { failure in
+            print(failure)
+        } receiveValue: { value in
+            print(value)
+        }
+        .store(in: &subscriptions)
+}
+/*
+ ——— Example of: replaceEmptyWith ———
+ 1
+ finished
+ */
+
+//消除队列中的optional值 2023-03-05(Sun) 21:06:59
+example(of: "replaceNil") {
+    [Optional("A"), nil, "加"].publisher
+        .eraseToAnyPublisher()
+        .replaceNil(with: "-")
+        .collect()
+        .sink { value in
+            print(value)
+        }
+        .store(in: &subscriptions)
+}
+/*
+ ——— Example of: replaceNil ———
+ ["A", "-", "加"]
+ */
+
 //使用映射型处理逻辑，对消息进行个性化处理 2023-03-05(Sun) 20:54:57
 example(of: "flatMap") {
     func decode(_ codes: [Int]) -> AnyPublisher<String, Never> {
