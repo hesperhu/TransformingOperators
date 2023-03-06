@@ -4,6 +4,43 @@ import Combine
 var subscriptions = Set<AnyCancellable>()
 
 
+//对队列中的数据进行处理，数据结果会在下一次处理时带入 2023-03-06(Mon) 08:57:51
+example(of: "scan")
+{
+    var dailyGainLoss: Int {
+        .random(in: 0...20)
+    }
+    
+    let thisMonth = (0...5)
+        .publisher
+        .map { _ in
+            dailyGainLoss
+        }
+        .scan(-2) { last, current in
+            print("上次数值：\(last), 本次输入：\(current)")
+            return max(0, last + current)
+        }
+        .sink { value in
+            print("sink中的数值：\(value)")
+        }
+        .store(in: &subscriptions)
+}
+/*
+ ——— Example of: scan ———
+ 上次数值：-2, 本次输入：20
+ 上次数值：18, 本次输入：10
+ 上次数值：28, 本次输入：5
+ 上次数值：33, 本次输入：3
+ 上次数值：36, 本次输入：9
+ 上次数值：45, 本次输入：4
+ sink中的数值：18
+ sink中的数值：28
+ sink中的数值：33
+ sink中的数值：36
+ sink中的数值：45
+ sink中的数值：49
+ */
+
 //如果队列中没有值，那么在结束之前，可以人为的发送一个消息进行补充 2023-03-05(Sun) 21:07:47
 example(of: "replaceEmptyWith") {
     let empty = Empty<Int, Never>()
