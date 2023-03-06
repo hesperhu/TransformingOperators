@@ -1,4 +1,5 @@
 //https://github.com/kodecocodes/comb-materials/blob/editions/3.0/03-transforming-operators/projects/Final.playground/Contents.swift
+//https://github.com/kodecocodes/comb-materials/blob/editions/3.0/03-transforming-operators/projects/challenge/Final.playground/Contents.swift
 
 import Foundation
 import Combine
@@ -6,6 +7,7 @@ import Combine
 var subscriptions = Set<AnyCancellable>()
 
 //将数据的处理分成几段，每段当做一个operator，最后再sink处理 2023-03-06(Mon) 10:13:28
+//根据final结果做了优化 2023-03-06(Mon) 10:24:33
 example(of: "Create a phone number lookup") {
   let contacts = [
     "603-555-1234": "Florent",
@@ -70,10 +72,18 @@ example(of: "Create a phone number lookup") {
             format(digits: digits)
         }
         .sink { numberStr in
-            print(dial(phoneNumber: numberStr))
+            print("first dial",dial(phoneNumber: numberStr))
         }
         .store(in: &subscriptions)
-    
+   
+    input
+        .map(convert)
+        .replaceNil(with: 0)
+        .collect(10)
+        .map(format)
+        .map(dial)
+        .sink{print("second dial:",$0)}
+        .store(in: &subscriptions)
 
   "0!1234567".forEach {
     input.send(String($0))
@@ -88,10 +98,14 @@ example(of: "Create a phone number lookup") {
   }
 }
 /*
+ 
  ——— Example of: Create a phone number lookup ———
- Contact not found for 000-123-4567
- Dialing Marin (408-555-4321)...
- Dialing Shai (212-555-3434)...
+ first dial Contact not found for 000-123-4567
+ second dial: Contact not found for 000-123-4567
+ first dial Dialing Marin (408-555-4321)...
+ second dial: Dialing Marin (408-555-4321)...
+ first dial Dialing Shai (212-555-3434)...
+ second dial: Dialing Shai (212-555-3434)...
 
  */
 
