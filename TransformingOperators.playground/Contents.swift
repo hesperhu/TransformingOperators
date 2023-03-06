@@ -5,8 +5,95 @@ import Combine
 
 var subscriptions = Set<AnyCancellable>()
 
+//将数据的处理分成几段，每段当做一个operator，最后再sink处理 2023-03-06(Mon) 10:13:28
+example(of: "Create a phone number lookup") {
+  let contacts = [
+    "603-555-1234": "Florent",
+    "408-555-4321": "Marin",
+    "217-555-1212": "Scott",
+    "212-555-3434": "Shai"
+  ]
+  
+  func convert(phoneNumber: String) -> Int? {
+    if let number = Int(phoneNumber),
+      number < 10 {
+      return number
+    }
 
+    let keyMap: [String: Int] = [
+      "abc": 2, "def": 3, "ghi": 4,
+      "jkl": 5, "mno": 6, "pqrs": 7,
+      "tuv": 8, "wxyz": 9
+    ]
 
+    let converted = keyMap
+      .filter { $0.key.contains(phoneNumber.lowercased()) }
+      .map { $0.value }
+      .first
+    return converted
+  }
+
+  func format(digits: [Int]) -> String {
+    var phone = digits.map(String.init)
+                      .joined()
+
+    phone.insert("-", at: phone.index(
+      phone.startIndex,
+      offsetBy: 3)
+    )
+
+    phone.insert("-", at: phone.index(
+      phone.startIndex,
+      offsetBy: 7)
+    )
+
+    return phone
+  }
+
+  func dial(phoneNumber: String) -> String {
+    guard let contact = contacts[phoneNumber] else {
+      return "Contact not found for \(phoneNumber)"
+    }
+
+    return "Dialing \(contact) (\(phoneNumber))..."
+  }
+  
+  let input = PassthroughSubject<String, Never>()
+  
+    input
+        .map({ dial in
+            convert(phoneNumber: dial)
+        })
+        .replaceNil(with: 0)
+        .collect(10)
+        .map { digits in
+            format(digits: digits)
+        }
+        .sink { numberStr in
+            print(dial(phoneNumber: numberStr))
+        }
+        .store(in: &subscriptions)
+    
+
+  "0!1234567".forEach {
+    input.send(String($0))
+  }
+  
+  "4085554321".forEach {
+    input.send(String($0))
+  }
+  
+  "A1BJKLDGEH".forEach {
+    input.send("\($0)")
+  }
+}
+/*
+ ——— Example of: Create a phone number lookup ———
+ Contact not found for 000-123-4567
+ Dialing Marin (408-555-4321)...
+ Dialing Shai (212-555-3434)...
+
+ */
 
 //对队列中的数据进行处理，数据结果会在下一次处理时带入 2023-03-06(Mon) 08:57:51
 example(of: "scan")
