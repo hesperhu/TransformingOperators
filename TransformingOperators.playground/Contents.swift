@@ -96,6 +96,8 @@ example(of: "Create a phone number lookup") {
   "A1BJKLDGEH".forEach {
     input.send("\($0)")
   }
+    
+    input.send(completion: .finished)
 }
 /*
  
@@ -181,7 +183,8 @@ example(of: "replaceNil") {
  ["A", "-", "加"]
  */
 
-//使用映射型处理逻辑，对消息进行个性化处理 2023-03-05(Sun) 20:54:57
+//使用映射型处理逻辑，先对消息做扁平化处理，再对消息进行个性化处理 2023-03-14(Tue) 21:14:12 
+//https://www.donnywals.com/using-map-flatmap-and-compactmap-in-combine/
 example(of: "flatMap") {
     func decode(_ codes: [Int]) -> AnyPublisher<String, Never> {
         Just(
